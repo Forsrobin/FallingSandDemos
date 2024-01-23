@@ -1,15 +1,16 @@
 <script setup lang="ts">
-// imports go here
+import { onMounted } from 'vue';
+import { initEngine } from "@/scripts/engine"
+
+onMounted(() => {
+  // code goes here
+  initEngine()
+});
+
 </script>
 
 <template>
-  <header>
-    <h1>Vue Sand</h1>
-  </header>
-
-  <main>
-    <p>Test</p>
-  </main>
+  <canvas id="canvas"></canvas>
 </template>
 
 <style scoped>
