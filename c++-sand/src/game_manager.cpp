@@ -15,6 +15,7 @@ void GameManager::run()
 {
     sf::Clock clock;
     sf::Time t;
+    int radius = 5;
     while (window->isOpen())
     {
         clock.restart().asSeconds();
@@ -40,13 +41,31 @@ void GameManager::run()
             {
                 mouse_pressed = 0;
             }
-            
+
             if (mouse_pressed == 1)
             {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
-                int x = mousePos.x / PIXEL_SIZE;
-                int y = mousePos.y / PIXEL_SIZE;
-                gameArray[x][y] = 1;
+
+                // Generate a circle around the mouse
+                for (int i = -radius; i < radius; i++)
+                {
+                    for (int j = -radius; j < radius; j++)
+                    {
+                        if (i * i + j * j < radius * radius)
+                        {
+                            int x = mousePos.x / PIXEL_SIZE + i;
+                            int y = mousePos.y / PIXEL_SIZE + j;
+                            if (x >= 0 && x < ROWS && y >= 0 && y < COLS)
+                            {
+                                gameArray[x][y] = 1;
+                            }
+                        }
+                    }
+                }
+
+                // int x = mousePos.x / PIXEL_SIZE;
+                // int y = mousePos.y / PIXEL_SIZE;
+                // gameArray[x][y] = 1;
             }
         }
 
