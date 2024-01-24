@@ -3,8 +3,8 @@ const WIDTH = 500
 const HEIGHT = 500
 
 // Dedfault pixel attributes
-const PIXEL_WIDTH = 10
-const PIXEL_HEIGHT = 10
+const PIXEL_WIDTH = 5
+const PIXEL_HEIGHT = 5
 
 // Global variables
 let ctx: CanvasRenderingContext2D | null
@@ -33,16 +33,16 @@ const drawPixelCoordinate = (x: number, y: number, color: string) => {
 }
 
 // Returns a cleared 2D array with only 0's
-// This is used to store states and create new states 
+// This is used to store states and create new states
 // for the updated canvas
 const clearCanvasArray = () => {
     let array: number[][] = [[]]
-    let xCounter = Math.floor(WIDTH / PIXEL_WIDTH)
-    let yCounter = Math.floor(HEIGHT / PIXEL_HEIGHT)
+    let rows = Math.floor(WIDTH / PIXEL_WIDTH)
+    let columns = Math.floor(HEIGHT / PIXEL_HEIGHT)
 
-    for (let row = 0; row < xCounter; row++) {
-        array[row] = [] // Make sure we have an array at each row, otherwise we can't push values there
-        for (let column = 0; column < yCounter; column++) {
+    for (let row = 0; row < rows; row++) {
+        array[row] = new Array(columns) // Make sure we have an array at each row, otherwise we can't push values there
+        for (let column = 0; column < array[row].length; column++) {
             array[row][column] = 0
         }
     }
@@ -53,6 +53,8 @@ const clearCanvasArray = () => {
 // Used to draw ther pixels on the canvas
 // based on the canvasArray and given attributes
 const draw = () => {
+    if (!ctx) return
+    ctx.clearRect(0, 0, WIDTH, HEIGHT)
     for (let row = 0; row < canvasArray.length; row++) {
         for (let column = 0; column < canvasArray[row].length; column++) {
             if (canvasArray[row][column] == 1) {
@@ -66,40 +68,45 @@ const draw = () => {
 // Used to update the canvasArray and create a new state
 const update = () => {
 
-    // Psuedo code
 
-    // Create a new empty canvasArray
-    // Loop through canvasArray
-    //      If pixel is empty: 
-    //          continue
-    //      If pixel is a falling entity (Sand, Water, etc.):
-    //          If pixel below is occupied:
-    //              Set newEmptyCanvasArray at pixel as falling entity (Dont move basically)
-    //              continue
-    //          If pixel below is empty (not a falling entity):
-    //              Set newEmptyCanvasArray at pixel below as the falling entity
-    //              continue
-    //          If pixel below is sand AND random pixel diagonal below is empty (Diagonal left or right):
-    //              Set newEmptyCanvasArray at pixel diagonal below as falling entity
-    //              continue
-    // Set the canvasArray to the newEmptyCanvasArray
+    let newEmptyCanvasArray: number[][] = clearCanvasArray() //Creates a new empty canvasArray
+    for (let row = 0; row < canvasArray.length; row++) { //Loops through the "row"-array
+        for (let column = 0; column < canvasArray[row].length; column++) { //Loops through the "column"-array
 
+            let randomDiagonal = 1;    //
+            if (Math.random() < 0.5) { // Generates random number, either -1 or 1
+                randomDiagonal *= -1;  //
+            }
 
-    for (let row = 0; row < canvasArray.length; row++) {
-        for (let column = 0; column < canvasArray[row].length; column++) {
-            //Check if pixel is Sand
-            if (canvasArray[row][column] == 1) {
-                //Check if pixel below is Sand, if not, move down one step
-                if (canvasArray[row + 1][column] == 1) {
+            let pixel = canvasArray[row][column] //Declares point in array as pixel
 
-                    continue
-                    // Check if right or left of pixel below is Sand
-                    // if(canvasArray[row + 1][column + 1])
+            if (pixel != 0) { //Checks wether pixel is falling entity or not
+                let below = canvasArray[row][column + 1]
+                let belowLeft = -1
+                let belowRight = -1
+                if (canvasArray[row - randomDiagonal][column + 1] != undefined) {
+                    belowLeft = canvasArray[row - randomDiagonal][column + 1]
+                } else if (canvasArray[row + randomDiagonal][column + 1] != undefined) {
+                    belowRight = canvasArray[row + randomDiagonal][column + 1]
+                } //Declares belowLeft and belowRight so that neither is undefined when code is ran
+
+                if (below == 0) { //Checks if pixel below is empty
+                    newEmptyCanvasArray[row][column + 1] = pixel
+                } else if (belowLeft == 0) { //Checks if pixel below and left is empty
+                    newEmptyCanvasArray[row - randomDiagonal][column + 1] = pixel
+                } else if (belowRight == 0) { //Checks if pixel below and right is empty
+                    newEmptyCanvasArray[row + randomDiagonal][column + 1] = pixel
+                } else { //Checks if pixel cant move and in that case will add a pixel at that point
+                    newEmptyCanvasArray[row][column] = pixel
                 }
+
             }
         }
     }
+    canvasArray = newEmptyCanvasArray
 }
+
+
 
 
 
@@ -122,7 +129,8 @@ export const initEngine = () => {
 
     if (ctx != null) {
         // Inital pixel to test
-        canvasArray[25][5] = 1
+        canvasArray[50][0] = 1
+        canvasArray[50][50] = 1
     }
 
     gameLoop()
